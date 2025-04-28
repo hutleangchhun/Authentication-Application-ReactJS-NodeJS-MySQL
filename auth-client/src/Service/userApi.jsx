@@ -3,7 +3,7 @@ import axios from 'axios';
 import { getToken } from '../auth';
 
 const api = axios.create({
-    baseURL: 'http://localhost:5000/api/users',
+    baseURL: 'http://localhost:5000/api',
     headers: {
         'Content-Type': 'application/json',
     },
@@ -24,6 +24,7 @@ const handleAxiosError = (error, fallbackMessage) => {
         const status = error.response.status;
         const message = error.response.data?.message || fallbackMessage;
 
+        // Customize error message based on status code
         if (status === 404) return `${fallbackMessage} — Not found (404)`;
         if (status === 500) return `${fallbackMessage} — Server error (500)`;
         if (status === 403 || status === 401) return `${fallbackMessage} — Unauthorized`;
@@ -36,22 +37,24 @@ const handleAxiosError = (error, fallbackMessage) => {
     }
 };
 
+
 // === User API Methods ===
 
 // Fetch all users
 export const fetchAllUsers = async () => {
     try {
-        const res = await api.get('/all');
+        const res = await api.get('users/all');
         return res.data.users;
     } catch (error) {
         throw new Error(handleAxiosError(error, 'Failed to fetch users'));
     }
 };
 
+
 // Fetch single user by ID
 export const fetchUserById = async (id) => {
     try {
-        const res = await api.get(`/show?id=${id}`);
+        const res = await api.get(`users/show?id=${id}`);
         return res.data.user;
     } catch (error) {
         throw new Error(handleAxiosError(error, 'Failed to fetch user'));
@@ -61,7 +64,7 @@ export const fetchUserById = async (id) => {
 // Update user
 export const updateUser = async (id, userData) => {
     try {
-        const res = await api.put(`/update?id=${id}`, userData);
+        const res = await api.put(`users/update?id=${id}`, userData);
         return res.data;
     } catch (error) {
         throw new Error(handleAxiosError(error, 'Failed to update user'));
@@ -71,7 +74,7 @@ export const updateUser = async (id, userData) => {
 // Delete user
 export const deleteUser = async (id) => {
     try {
-        const res = await api.delete(`/delete?id=${id}`);
+        const res = await api.delete(`users/delete?id=${id}`);
         return res.data;
     } catch (error) {
         throw new Error(handleAxiosError(error, 'Failed to delete user'));
@@ -81,19 +84,18 @@ export const deleteUser = async (id) => {
 // Add this in userService.js
 export const loginUser = async (credentials) => {
     try {
-        const res = await axios.post('http://localhost:5000/api/login', credentials);
+        const res = await axios.post('/login', credentials);
         return res.data;
     } catch (error) {
         throw new Error('Login failed. Please check your credentials.');
     }
 };
-
 export const registerUser = async (userData) => {
     try {
-        const res = await axios.post('http://localhost:5000/api/register', userData);
-        return res.data;
+        const res = await api.post('/register', userData);
+        return res.data;  // Return success response
     } catch (error) {
-        throw new Error('Registration failed');
+        // Pass the error to be handled
+        throw new Error(handleAxiosError(error, 'Registration failed'));
     }
 };
-

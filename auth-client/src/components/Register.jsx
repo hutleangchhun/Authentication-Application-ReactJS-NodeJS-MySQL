@@ -4,13 +4,28 @@ import Swal from 'sweetalert2';
 
 export default function Register() {
     const [form, setForm] = useState({ username: '', password: '', role: 'user' });
+    const [loading, setLoading] = useState(false);
 
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
     };
 
+    const validateForm = () => {
+        if (!form.username || !form.password) {
+            Swal.fire({
+                icon: 'error',
+                title: 'All fields are required!',
+            });
+            return false;
+        }
+        return true;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!validateForm()) return;
+
+        setLoading(true); // Show loading indicator
         try {
             await registerUser(form);
             Swal.fire({
@@ -21,20 +36,34 @@ export default function Register() {
             });
             resetForm();
         } catch (err) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Registration failed!',
-                text: 'Please try again later.',
-            });
+            // Handle specific error codes and messages
+            if (err.message.includes('Username already exists')) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Registration failed!',
+                    text: 'Username already taken. Please choose a different username.',
+                });
+            } else {
+                // Handle other errors
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Registration failed!',
+                    text: err.message || 'Something went wrong. Please try again later.',
+                });
+            }
+        } finally {
+            setLoading(false); // Hide loading indicator
         }
     };
-    const resetForm = () =>{
+
+    const resetForm = () => {
         setForm({
-            username: "",
-            password: "",
-            role: "user"
+            username: '',
+            password: '',
+            role: 'user'
         });
     };
+
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100">
             <form
@@ -74,8 +103,9 @@ export default function Register() {
                 <button
                     type="submit"
                     className="w-full bg-green-500 text-white py-2 rounded-md hover:bg-green-600"
+                    disabled={loading}
                 >
-                    Sign Up
+                    {loading ? 'Registering...' : 'Sign Up'}
                 </button>
             </form>
         </div>
