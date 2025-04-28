@@ -81,15 +81,16 @@ export const deleteUser = async (id) => {
     }
 };
 
-// Add this in userService.js
+// Add this in userService.js   
 export const loginUser = async (credentials) => {
     try {
-        const res = await axios.post('/login', credentials);
+        const res = await api.post('/login', credentials);  // ❌
         return res.data;
     } catch (error) {
         throw new Error('Login failed. Please check your credentials.');
     }
 };
+
 export const registerUser = async (userData) => {
     try {
         const res = await api.post('/register', userData);
